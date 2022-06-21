@@ -1,19 +1,20 @@
 [package]
 
-name = "termbox-sys"
-version = "0.2.12"
+name = "termbox2-sys"
+version = "0.0.1"
 authors = [
+    "yyscript  <yyscript@gmail.com>",
     "Greg Chapple <gregchapple1@gmail.com>",
     "Tom Jakubowski <tom@crystae.net>"
 ]
 
-links = "termbox"
+links = "termbox2"
 build = "build.rs"
 license = "MIT"
 description = "Low level bindings for the termbox library"
-repository = "https://github.com/gchp/termbox-sys"
-homepage = "https://github.com/gchp/termbox-sys"
+repository = "https://github.com/yymirror/termbox2-sys"
+homepage = "https://github.com/yymirror/termbox-sys"
 
 [lib]
-name = "termbox_sys"
+name = "termbox2_sys"
 path = "lib.rs"

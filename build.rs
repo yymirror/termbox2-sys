@@ -7,82 +7,24 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let dst = Path::new(&out_dir);
 
-    clean();
-    setup();
-    configure();
     build();
-    install(&dst);
-    clean();
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
-    println!("cargo:rustc-link-lib=static=termbox");
-}
-
-fn setup() {
-    let mut cmd = Command::new("git");
-    cmd.arg("clone");
-    cmd.arg("https://github.com/nsf/termbox");
-    cmd.arg(".termbox");
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let cargo_dir = Path::new(&manifest_dir);
-    cmd.current_dir(&cargo_dir);
-
-    run(&mut cmd);
-}
-
-fn clean() {
-    let mut cmd = Command::new("rm");
-    cmd.arg("-rf");
-    cmd.arg(".termbox");
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let cargo_dir = Path::new(&manifest_dir);
-    cmd.current_dir(&cargo_dir);
-    run(&mut cmd);
-}
-
-fn configure() {
-    let mut cmd = waf();
-    cmd.arg("configure");
-    cmd.arg("--prefix=/");
-    cmd.arg("--libdir=/lib");
-
-    let target = env::var("TARGET").unwrap();
-    let mut cflags;
-    if target.contains("i686") {
-        cflags = "-m32"
-    } else if target.contains("x86_64") {
-        cflags = "-m64 -fPIC"
-    } else {
-        cflags = "-fPIC"
-    }
-    println!("waf configure: setting CFLAGS to: `{}`", cflags);
-    env::set_var("CFLAGS", cflags);
-
-    run(&mut cmd);
-    env::remove_var("CFLAGS");
+    println!("cargo:rustc-link-lib=static=termbox2");
 }
 
 fn build() {
-    let mut cmd = waf();
-    cmd.arg("build");
-    cmd.arg("--targets=termbox_static");
+    let mut cmd = mkslib();
+    env::set_var("DESTDIR", env::var("OUT_DIR").unwrap());
     run(&mut cmd);
+    env::remove_var("DESTDIR");
 }
 
-fn install(dst: &Path) {
-    let mut cmd = waf();
-    cmd.arg("install");
-    cmd.arg("--targets=termbox_static");
-    cmd.arg(format!("--destdir={}", dst.display()));
-    run(&mut cmd);
-}
-
-fn waf() -> Command {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let cargo_dir = Path::new(&manifest_dir);
-    let termbox_dir = cargo_dir.join(".termbox");
-    let waf_file = fs::canonicalize(&termbox_dir.join("waf")).expect("Invalid location of waf file");
-    let mut cmd = Command::new(waf_file);
-    cmd.current_dir(&termbox_dir);
+fn mkslib() -> Command {
+    let cwd = env::current_dir().expect("Couldn't get the current directory");
+    let workdir = Path::new(&cwd);
+    let cmd_file = fs::canonicalize(&workdir.join("mkslib.sh")).expect("Couldn't find mkslib.sh-script");
+    let mut cmd = Command::new(cmd_file);
+    cmd.current_dir(&workdir);
     cmd
 }
 

@@ -1577,9 +1577,9 @@ int tb_extend_cell(int x, int y, uint32_t ch) {
 
 int tb_blit(int x, int y, int w, int h, const struct tb_cell *cells) {
     if (x + w < 0 || x >= global.width)
-        return;
+        return -1;
     if (y + h < 0 || y >= global.height)
-        return;
+        return -1;
     int xo = 0, yo = 0, ww = w, hh = h;
     if (x < 0) {
         xo = -x;
@@ -1597,7 +1597,8 @@ int tb_blit(int x, int y, int w, int h, const struct tb_cell *cells) {
         hh = global.height - y;
 
     int sy;
-    struct tb_cell *dst = &CELL(&back_buffer, x, y);
+    struct tb_cell *dst =
+        &((&global.back)->cells[(y) * (&global.back)->width + x]);
     const struct tb_cell *src = cells + yo * w + xo;
     size_t size = sizeof(struct tb_cell) * ww;
 

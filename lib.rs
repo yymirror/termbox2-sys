@@ -3,12 +3,14 @@ use std::os::raw::{
     c_int,
 };
 
+type U32ATTR = u32;
+
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct RawCell {
     pub ch: u32,
-    pub fg: u16,
-    pub bg: u16,
+    pub fg: U32ATTR,
+    pub bg: U32ATTR,
 }
 
 #[repr(C)]
@@ -26,19 +28,19 @@ pub struct RawEvent {
 
 extern "C" {
     pub fn tb_init() -> c_int;
-    pub fn tb_shutdown();
+    pub fn tb_shutdown() -> c_int;
     pub fn tb_width() -> c_int;
     pub fn tb_height() -> c_int;
-    pub fn tb_clear();
-    pub fn tb_set_clear_attributes(fg: u16, bg: u16);
-    pub fn tb_present();
-    pub fn tb_set_cursor(cx: c_int, cy: c_int);
-    pub fn tb_put_cell(x: c_int, y: c_int, cell: *const RawCell);
-    pub fn tb_change_cell(x: c_int, y: c_int, ch: u32, fg: u16, bg: u16);
-    pub fn tb_blit(x: c_int, y: c_int, w: c_int, h: c_int, cells: *const RawCell);
+    pub fn tb_clear() -> c_int;
+    pub fn tb_set_clear_attrs(fg: U32ATTR, bg: U32ATTR) -> c_int;
+    pub fn tb_present() -> c_int;
+    pub fn tb_set_cursor(cx: c_int, cy: c_int) -> c_int;
+    pub fn tb_put_cell(x: c_int, y: c_int, cell: *const RawCell) -> c_int;
+    pub fn tb_set_cell(x: c_int, y: c_int, ch: u32, fg: U32ATTR, bg: U32ATTR) -> c_int;
+    pub fn tb_blit(x: c_int, y: c_int, w: c_int, h: c_int, cells: *const RawCell) -> c_int;
     pub fn tb_cell_buffer() -> *mut RawCell;
-    pub fn tb_select_input_mode(mode: c_int) -> c_int;
-    pub fn tb_select_output_mode(mode: c_int) -> c_int;
+    pub fn tb_set_input_mode(mode: c_int) -> c_int;
+    pub fn tb_set_output_mode(mode: c_int) -> c_int;
     pub fn tb_peek_event(ev: *mut RawEvent, timeout: c_int) -> c_int;
     pub fn tb_poll_event(ev: *mut RawEvent) -> c_int;
     pub fn tb_utf8_char_length(c: c_char) -> c_int;
@@ -68,12 +70,13 @@ pub const TB_KEY_ARROW_UP: u16 = 0xffff - 18;
 pub const TB_KEY_ARROW_DOWN: u16 = 0xffff - 19;
 pub const TB_KEY_ARROW_LEFT: u16 = 0xffff - 20;
 pub const TB_KEY_ARROW_RIGHT: u16 = 0xffff - 21;
-pub const TB_KEY_MOUSE_LEFT: u16 = 0xffff - 22;
-pub const TB_KEY_MOUSE_RIGHT: u16 = 0xffff - 23;
-pub const TB_KEY_MOUSE_MIDDLE: u16 = 0xffff - 24;
-pub const TB_KEY_MOUSE_RELEASE: u16 = 0xffff - 25;
-pub const TB_KEY_MOUSE_WHEEL_UP: u16 = 0xffff - 26;
-pub const TB_KEY_MOUSE_WHEEL_DOWN: u16 = 0xffff - 27;
+pub const TB_KEY_BACK_TAB: u16 = 0xffff - 22;
+pub const TB_KEY_MOUSE_LEFT: u16 = 0xffff - 23;
+pub const TB_KEY_MOUSE_RIGHT: u16 = 0xffff - 24;
+pub const TB_KEY_MOUSE_MIDDLE: u16 = 0xffff - 25;
+pub const TB_KEY_MOUSE_RELEASE: u16 = 0xffff - 26;
+pub const TB_KEY_MOUSE_WHEEL_UP: u16 = 0xffff - 27;
+pub const TB_KEY_MOUSE_WHEEL_DOWN: u16 = 0xffff - 28;
 
 pub const TB_KEY_CTRL_TILDE: u16 = 0x00;
 pub const TB_KEY_CTRL_2: u16 = 0x00;
@@ -136,6 +139,14 @@ pub const TB_WHITE: u16 = 0x08;
 pub const TB_BOLD: u16 = 0x0100;
 pub const TB_UNDERLINE: u16 = 0x0200;
 pub const TB_REVERSE: u16 = 0x0400;
+pub const TB_ITALIC: u16 = 0x0800;
+pub const TB_BLINK: u16 = 0x1000;
+
+pub const TB_TRUECOLOR_BOLD: u32 = 0x01000000;
+pub const TB_TRUECOLOR_UNDERLINE: u32 = 0x02000000;
+pub const TB_TRUECOLOR_REVERSE: u32 = 0x04000000;
+pub const TB_TRUECOLOR_ITALIC: u32 = 0x08000000;
+pub const TB_TRUECOLOR_BLINK: u32 = 0x10000000;
 
 pub const TB_EVENT_KEY: u8 = 1;
 pub const TB_EVENT_RESIZE: u8 = 2;
@@ -157,5 +168,6 @@ pub const TB_OUTPUT_NORMAL: c_int = 1;
 pub const TB_OUTPUT_256: c_int = 2;
 pub const TB_OUTPUT_216: c_int = 3;
 pub const TB_OUTPUT_GRAYSCALE: c_int = 4;
+pub const TB_OUTPUT_TRUECOLOR: c_int = 5;
 
 pub const TB_EOF: c_int = -1;
